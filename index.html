@@ -2,131 +2,173 @@
 <html lang="id" class="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
 <title>Trading Journal Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  html { color-scheme: dark; }
-  body { font-family: 'Inter', system-ui, sans-serif; }
+  html { color-scheme: dark; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif; background-color: #09090b;
+    background-image: radial-gradient(900px 320px at 50% -120px, rgba(16,185,129,.09), transparent);
+    background-repeat: no-repeat; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+  }
   .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; }
-  ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+  /* ---------- Form ---------- */
   .inp {
-    width: 100%; border-radius: 0.5rem; background: #18181b; border: 1px solid #3f3f46;
-    padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #f4f4f5; outline: none;
+    width: 100%; border-radius: 0.6rem; background: #18181b; border: 1px solid #3f3f46;
+    padding: 0.55rem 0.75rem; font-size: 0.875rem; color: #f4f4f5; outline: none; min-height: 40px;
     transition: border-color .15s, box-shadow .15s;
   }
   .inp::placeholder { color: #71717a; }
   .inp:focus { border-color: #10b981; box-shadow: 0 0 0 1px #10b981; }
   .inp.invalid { border-color: #f43f5e; box-shadow: 0 0 0 1px #f43f5e; }
   select.inp { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
-  .lbl { display: block; font-size: 0.72rem; font-weight: 500; color: #a1a1aa; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: .04em; }
-  .err { color: #fb7185; font-size: 0.72rem; margin-top: 0.2rem; min-height: 0; }
+  .lbl { display: block; font-size: 0.7rem; font-weight: 500; color: #a1a1aa; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: .04em; }
+  .err { color: #fb7185; font-size: 0.72rem; margin-top: 0.2rem; }
+  @media (max-width: 767px) { .inp { font-size: 16px; } } /* cegah auto-zoom iOS */
+
+  /* ---------- Komponen ---------- */
   .card { background: #111113; border: 1px solid #27272a; border-radius: 0.9rem; }
-  .btn { display: inline-flex; align-items: center; gap: .45rem; border-radius: .6rem; padding: .5rem .9rem; font-size: .85rem; font-weight: 500; transition: all .15s; cursor: pointer; white-space: nowrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; border-radius: .65rem; padding: .5rem .9rem; min-height: 40px; font-size: .85rem; font-weight: 500; transition: all .15s; cursor: pointer; white-space: nowrap; }
   .btn-primary { background: #10b981; color: #052e1f; font-weight: 600; }
   .btn-primary:hover { background: #34d399; }
   .btn-ghost { background: #18181b; border: 1px solid #3f3f46; color: #e4e4e7; }
   .btn-ghost:hover { background: #27272a; }
   .btn-danger { background: #e11d48; color: #fff; }
   .btn-danger:hover { background: #f43f5e; }
-  .icon-btn { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: .5rem; color: #a1a1aa; transition: all .15s; cursor: pointer; }
+  .icon-btn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: .55rem; color: #a1a1aa; transition: all .15s; cursor: pointer; }
   .icon-btn:hover { background: #27272a; color: #fff; }
   .icon-btn.del:hover { background: rgba(244,63,94,.15); color: #fb7185; }
-  .badge { display: inline-flex; align-items: center; padding: .12rem .55rem; border-radius: 999px; font-size: .7rem; font-weight: 600; border: 1px solid transparent; white-space: nowrap; }
+  .badge { display: inline-flex; align-items: center; padding: .12rem .55rem; border-radius: 999px; font-size: .68rem; font-weight: 600; border: 1px solid transparent; white-space: nowrap; }
+  .star-btn { cursor: pointer; font-size: 1.6rem; line-height: 1; color: #3f3f46; transition: transform .1s, color .1s; background: none; border: 0; padding: 0 3px; }
+  .star-btn.on { color: #fbbf24; }
+
+  /* Segmented LONG/SHORT */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #18181b; border: 1px solid #3f3f46; border-radius: .7rem; padding: 3px; }
+  .seg button { padding: .6rem; border-radius: .5rem; font-size: .82rem; font-weight: 600; color: #a1a1aa; transition: .15s; }
+  .seg button.long.on { background: rgba(16,185,129,.18); color: #34d399; box-shadow: inset 0 0 0 1px rgba(16,185,129,.45); }
+  .seg button.short.on { background: rgba(244,63,94,.18); color: #fb7185; box-shadow: inset 0 0 0 1px rgba(244,63,94,.45); }
+
+  /* ---------- Chart ---------- */
+  .chart-box { position: relative; width: 100%; height: 240px; min-width: 0; }
+  .chart-box canvas { display: block; max-width: 100%; }
+  @media (min-width: 640px) { .chart-box { height: 300px; } }
+
+  /* ---------- Modal sebagai bottom-sheet di HP ---------- */
+  .sheet { width: 100%; max-height: 92vh; max-height: 92dvh; display: flex; flex-direction: column; border-radius: 1.1rem 1.1rem 0 0; animation: slideUp .24s ease-out; }
+  .sheet-body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .sheet-foot { flex-shrink: 0; padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  .grab { width: 40px; height: 4px; border-radius: 4px; background: #3f3f46; margin: 8px auto 0; }
+  @media (min-width: 640px) { .sheet { border-radius: .9rem; max-height: 90vh; animation: pop .18s ease-out; } .sheet-foot { padding-bottom: 1rem; } }
   .modal-enter { animation: pop .18s ease-out; }
   @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
-  .star-btn { cursor: pointer; font-size: 1.4rem; line-height: 1; color: #3f3f46; transition: transform .1s, color .1s; background: none; border: 0; padding: 0 2px; }
-  .star-btn.on { color: #fbbf24; }
-  .star-btn:hover { transform: scale(1.15); }
-  .chart-box { position: relative; height: 290px; }
-  tbody tr:first-child { border-top: 0; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: none; } }
+
+  /* ---------- Kartu trade (mobile) ---------- */
+  .tcard { padding: .9rem; border-top: 1px solid rgba(39,39,42,.9); cursor: pointer; transition: background .15s; }
+  .tcard:first-child { border-top: 0; }
+  .tcard:active { background: #18181b; }
+  .cap { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #71717a; }
+
+  /* ---------- Filter ---------- */
+  .fgrid { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+  .fgrid.open { display: grid; }
+  @media (min-width: 768px) { .fgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+  .fab { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 30; width: 56px; height: 56px; border-radius: 18px; background: #10b981; color: #052e1f; font-size: 1.25rem; box-shadow: 0 10px 28px rgba(16,185,129,.35), 0 2px 8px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+  .fab:active { transform: scale(.94); }
 </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen antialiased">
+<body class="text-zinc-100 min-h-screen antialiased">
 
 <!-- ================= HEADER ================= -->
-<header class="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/85 backdrop-blur">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+<header class="relative sm:sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-3">
+    <div class="order-1 flex items-center gap-2.5 min-w-0">
+      <div class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
         <i class="fa-solid fa-chart-line text-emerald-400"></i>
       </div>
-      <div>
-        <h1 class="text-base font-bold leading-tight">Trading Journal <span class="text-emerald-400">Pro</span></h1>
-        <p class="text-[11px] text-zinc-500 leading-tight">Catat, evaluasi, dan disiplinkan trading kamu</p>
+      <div class="min-w-0">
+        <h1 class="text-base font-bold leading-tight truncate">Trading Journal <span class="text-emerald-400">Pro</span></h1>
+        <p class="hidden sm:block text-[11px] text-zinc-500 leading-tight">Catat, evaluasi, dan disiplinkan trading kamu</p>
       </div>
     </div>
-    <div class="ml-auto flex flex-wrap items-center gap-2">
-      <label class="flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-zinc-400">
-        <i class="fa-solid fa-wallet"></i> Modal Awal
-        <span class="text-zinc-500">$</span>
-        <input id="initBalance" type="number" min="1" step="any" class="mono w-24 bg-transparent text-sm text-zinc-100 outline-none">
-      </label>
-      <button id="btnAdd" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah Trade</button>
+
+    <div class="order-2 sm:order-3 ml-auto sm:ml-0 flex items-center gap-2">
+      <button id="btnAdd" class="btn btn-primary hidden sm:inline-flex"><i class="fa-solid fa-plus"></i> Tambah Trade</button>
       <div class="relative">
-        <button id="btnMenu" class="btn btn-ghost"><i class="fa-solid fa-database"></i> Data <i class="fa-solid fa-chevron-down text-[10px]"></i></button>
-        <div id="menu" class="hidden absolute right-0 mt-2 w-60 card p-1.5 shadow-2xl shadow-black/60 z-50">
-          <button data-menu="csv" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-file-csv w-4 text-emerald-400"></i> Export ke CSV</button>
-          <button data-menu="json" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-file-code w-4 text-sky-400"></i> Export JSON (Backup)</button>
-          <button data-menu="import" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-file-import w-4 text-amber-400"></i> Import JSON (Restore)</button>
+        <button id="btnMenu" class="btn btn-ghost" aria-label="Menu data"><i class="fa-solid fa-database"></i><span class="hidden sm:inline">Data</span><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+        <div id="menu" class="hidden absolute right-0 mt-2 w-64 card p-1.5 shadow-2xl shadow-black/60 z-50">
+          <button data-menu="csv" class="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-file-csv w-4 text-emerald-400"></i> Export ke CSV</button>
+          <button data-menu="json" class="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-file-code w-4 text-sky-400"></i> Export JSON (Backup)</button>
+          <button data-menu="import" class="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-file-import w-4 text-amber-400"></i> Import JSON (Restore)</button>
           <div class="my-1 border-t border-zinc-800"></div>
-          <button data-menu="demo" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-rotate w-4 text-violet-400"></i> Reset / Isi Data Demo</button>
-          <button data-menu="clear" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-rose-500/10 text-rose-400 flex items-center gap-2"><i class="fa-solid fa-trash w-4"></i> Hapus Semua Data</button>
+          <button data-menu="demo" class="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-800 flex items-center gap-2"><i class="fa-solid fa-rotate w-4 text-violet-400"></i> Reset / Isi Data Demo</button>
+          <button data-menu="clear" class="w-full text-left px-3 py-2.5 text-sm rounded-lg hover:bg-rose-500/10 text-rose-400 flex items-center gap-2"><i class="fa-solid fa-trash w-4"></i> Hapus Semua Data</button>
         </div>
       </div>
       <input id="fileImport" type="file" accept=".json,application/json" class="hidden">
     </div>
+
+    <label class="order-3 sm:order-2 w-full sm:w-auto sm:ml-auto flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-zinc-400">
+      <i class="fa-solid fa-wallet"></i><span class="flex-1 sm:flex-none">Modal Awal</span>
+      <span class="text-zinc-500">$</span>
+      <input id="initBalance" type="number" inputmode="decimal" min="1" step="any" class="mono w-28 bg-transparent text-base sm:text-sm text-zinc-100 outline-none text-right sm:text-left">
+    </label>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+<main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-28 md:pb-10">
 
   <!-- ================= KPI ================= -->
-  <section>
-    <div id="kpiMain" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3"></div>
-    <div id="kpiExtra" class="grid grid-cols-2 xl:grid-cols-4 gap-3 mt-3"></div>
-  </section>
+  <section id="kpiGrid" class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3"></section>
 
   <!-- ================= CHARTS ================= -->
-  <section class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-    <div class="card p-4 xl:col-span-2">
-      <div class="flex items-center justify-between mb-3">
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div class="card p-3 sm:p-4 lg:col-span-2 min-w-0">
+      <div class="flex items-center justify-between gap-2 mb-3">
         <h2 class="text-sm font-semibold"><i class="fa-solid fa-chart-area text-emerald-400 mr-2"></i>Equity Curve</h2>
-        <span id="eqNote" class="text-xs text-zinc-500"></span>
+        <span id="eqNote" class="text-[11px] sm:text-xs text-zinc-500 truncate"></span>
       </div>
       <div class="chart-box"><canvas id="c-equity"></canvas></div>
     </div>
-    <div class="card p-4">
+    <div class="card p-3 sm:p-4 min-w-0">
       <h2 class="text-sm font-semibold mb-3"><i class="fa-solid fa-chart-pie text-sky-400 mr-2"></i>Distribusi Hasil</h2>
       <div class="chart-box"><canvas id="c-dist"></canvas></div>
     </div>
-    <div class="card p-4 xl:col-span-3">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold"><i class="fa-solid fa-chart-column text-amber-400 mr-2"></i>Performa per Setup / Strategi (Net P&amp;L)</h2>
-      </div>
-      <div class="chart-box" style="height:260px"><canvas id="c-setup"></canvas></div>
+    <div class="card p-3 sm:p-4 lg:col-span-3 min-w-0">
+      <h2 class="text-sm font-semibold mb-3"><i class="fa-solid fa-chart-column text-amber-400 mr-2"></i>Performa per Setup / Strategi <span class="text-zinc-500 font-normal">(Net P&amp;L)</span></h2>
+      <div id="setupBox" class="chart-box"><canvas id="c-setup"></canvas></div>
     </div>
   </section>
 
-  <!-- ================= TABLE ================= -->
-  <section class="card">
-    <div class="p-4 border-b border-zinc-800">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <h2 class="text-sm font-semibold"><i class="fa-solid fa-table-list text-violet-400 mr-2"></i>Riwayat Trade <span id="countInfo" class="text-zinc-500 font-normal ml-1"></span></h2>
-        <button id="btnResetFilter" class="btn btn-ghost !py-1.5 !text-xs"><i class="fa-solid fa-filter-circle-xmark"></i> Reset Filter</button>
+  <!-- ================= RIWAYAT ================= -->
+  <section class="card overflow-hidden">
+    <div class="p-3 sm:p-4 border-b border-zinc-800 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold"><i class="fa-solid fa-table-list text-violet-400 mr-2"></i>Riwayat Trade <span id="countInfo" class="text-zinc-500 font-normal ml-1 text-xs"></span></h2>
+        <button id="btnResetFilter" class="btn btn-ghost !py-1 !min-h-[34px] !text-xs"><i class="fa-solid fa-filter-circle-xmark"></i> Reset</button>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
-        <div class="relative col-span-2 xl:col-span-2">
+      <div class="flex gap-2">
+        <div class="relative flex-1 min-w-0">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
           <input id="fQ" class="inp !pl-8" placeholder="Cari simbol, setup, catatan...">
         </div>
+        <button id="btnFilterToggle" class="btn btn-ghost md:hidden relative" aria-label="Filter">
+          <i class="fa-solid fa-sliders"></i>
+          <span id="filterBadge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500 text-[10px] font-bold text-emerald-950 flex items-center justify-center"></span>
+        </button>
+      </div>
+      <div id="filterGrid" class="fgrid">
         <select id="fSymbol" class="inp"></select>
         <select id="fStatus" class="inp">
           <option value="">Semua Status</option><option>WIN</option><option>LOSS</option><option>BE</option>
@@ -135,10 +177,16 @@
           <option value="">Semua Arah</option><option value="LONG">LONG</option><option value="SHORT">SHORT</option>
         </select>
         <select id="fEmotion" class="inp"></select>
+        <select id="fSort" class="inp col-span-2 md:col-span-1">
+          <option value="new">Terbaru</option><option value="old">Terlama</option>
+          <option value="best">P&amp;L Tertinggi</option><option value="worst">P&amp;L Terendah</option>
+        </select>
       </div>
     </div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm min-w-[1150px]">
+
+    <!-- Tabel (desktop) -->
+    <div class="hidden lg:block overflow-x-auto">
+      <table class="w-full text-sm min-w-[1040px]">
         <thead>
           <tr class="text-left text-[11px] uppercase tracking-wider text-zinc-500 bg-zinc-900/50">
             <th class="px-3 py-3 font-medium">Tanggal</th>
@@ -158,133 +206,145 @@
         </thead>
         <tbody id="tbody"></tbody>
       </table>
-      <div id="emptyState" class="hidden py-14 text-center text-zinc-500">
-        <i class="fa-regular fa-folder-open text-3xl mb-3 block"></i>
-        <p class="text-sm">Belum ada trade yang cocok. Klik <b class="text-emerald-400">Tambah Trade</b> atau isi data demo.</p>
-      </div>
     </div>
-    <p class="px-4 py-3 text-[11px] text-zinc-600 border-t border-zinc-800">Status BE (Break-Even) jika |P&amp;L| &lt; $1. R = P&amp;L ÷ risiko awal (|Entry−SL| × size × multiplier). Data tersimpan di localStorage browser ini.</p>
+
+    <!-- Kartu (HP / tablet) -->
+    <div id="cards" class="lg:hidden"></div>
+
+    <div id="emptyState" class="hidden py-14 px-4 text-center text-zinc-500">
+      <i class="fa-regular fa-folder-open text-3xl mb-3 block"></i>
+      <p class="text-sm">Belum ada trade yang cocok. Tekan <b class="text-emerald-400">Tambah Trade</b> atau isi data demo lewat menu Data.</p>
+    </div>
+
+    <div id="loadMoreWrap" class="hidden p-3 border-t border-zinc-800">
+      <button id="btnLoadMore" class="btn btn-ghost w-full"></button>
+    </div>
+
+    <p class="px-4 py-3 text-[11px] leading-relaxed text-zinc-600 border-t border-zinc-800">BE (Break-Even) bila |P&amp;L| &lt; $1. R = P&amp;L ÷ risiko awal (|Entry−SL| × size × multiplier). Data tersimpan di localStorage browser ini.</p>
   </section>
 </main>
 
+<!-- FAB (HP) -->
+<button id="fab" class="fab sm:hidden" aria-label="Tambah trade"><i class="fa-solid fa-plus"></i></button>
+
 <!-- ================= MODAL FORM ================= -->
-<div id="modalForm" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto">
-  <div class="min-h-full flex items-start sm:items-center justify-center p-3 sm:p-6">
-    <form id="tradeForm" class="card modal-enter w-full max-w-3xl shadow-2xl shadow-black" novalidate>
-      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-        <h3 id="formTitle" class="font-semibold">Tambah Trade</h3>
-        <button type="button" data-close="modalForm" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-5 space-y-5">
-        <!-- Data dasar -->
-        <div>
-          <p class="text-xs font-semibold text-emerald-400 mb-2"><i class="fa-solid fa-circle-info mr-1"></i> DATA DASAR</p>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="col-span-2 md:col-span-1">
-              <label class="lbl">Tanggal &amp; Waktu</label>
-              <input id="f-datetime" type="datetime-local" class="inp">
-              <p class="err" data-err="datetime"></p>
-            </div>
-            <div>
-              <label class="lbl">Simbol / Pair</label>
-              <input id="f-symbol" list="symbolList" class="inp" placeholder="XAUUSD" autocomplete="off">
-              <datalist id="symbolList"><option>XAUUSD</option><option>BTCUSDT</option><option>ETHUSDT</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>NAS100</option><option>BBCA</option></datalist>
-              <p class="err" data-err="symbol"></p>
-            </div>
-            <div>
-              <label class="lbl">Arah</label>
-              <select id="f-direction" class="inp">
-                <option value="LONG">LONG / BUY</option>
-                <option value="SHORT">SHORT / SELL</option>
-              </select>
-            </div>
-            <div>
-              <label class="lbl">Sesi Pasar</label>
-              <select id="f-session" class="inp">
-                <option>Asia</option><option>London</option><option>New York</option>
-              </select>
-            </div>
-          </div>
-        </div>
+<div id="modalForm" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-6">
+  <form id="tradeForm" class="card sheet max-w-3xl shadow-2xl shadow-black" novalidate>
+    <div class="grab sm:hidden"></div>
+    <div class="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-zinc-800 shrink-0">
+      <h3 id="formTitle" class="font-semibold">Tambah Trade</h3>
+      <button type="button" data-close="modalForm" class="icon-btn" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-        <!-- Harga & risiko -->
-        <div>
-          <p class="text-xs font-semibold text-emerald-400 mb-2"><i class="fa-solid fa-coins mr-1"></i> HARGA &amp; RISIKO</p>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div><label class="lbl">Harga Entry</label><input id="f-entry" type="number" step="any" class="inp mono"><p class="err" data-err="entry"></p></div>
-            <div><label class="lbl">Stop Loss</label><input id="f-sl" type="number" step="any" class="inp mono"><p class="err" data-err="sl"></p></div>
-            <div><label class="lbl">Take Profit</label><input id="f-tp" type="number" step="any" class="inp mono"><p class="err" data-err="tp"></p></div>
-            <div><label class="lbl">Harga Exit Aktual</label><input id="f-exit" type="number" step="any" class="inp mono"><p class="err" data-err="exit"></p></div>
-            <div><label class="lbl">Ukuran (Lot / Unit)</label><input id="f-size" type="number" step="any" min="0" class="inp mono"><p class="err" data-err="size"></p></div>
-            <div>
-              <label class="lbl" title="Nilai $ per 1 poin harga per 1 lot/unit. XAUUSD=100, Forex=100000, Crypto=1">Multiplier / Contract</label>
-              <input id="f-mult" type="number" step="any" min="0" class="inp mono"><p class="err" data-err="mult"></p>
-            </div>
-            <div class="col-span-2">
-              <label class="lbl flex items-center justify-between">
-                <span>Net P&amp;L ($)</span>
-                <button type="button" id="btnAutoPnl" class="normal-case tracking-normal text-emerald-400 hover:text-emerald-300 text-[11px]"><i class="fa-solid fa-wand-magic-sparkles"></i> Hitung otomatis</button>
-              </label>
-              <input id="f-pnl" type="number" step="any" class="inp mono" placeholder="Otomatis, bisa diedit (komisi/swap)">
-              <p class="err" data-err="pnl"></p>
-            </div>
+    <div class="sheet-body p-4 sm:p-5 space-y-5">
+      <!-- Data dasar -->
+      <div>
+        <p class="text-xs font-semibold text-emerald-400 mb-2"><i class="fa-solid fa-circle-info mr-1"></i> DATA DASAR</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="col-span-2">
+            <label class="lbl">Tanggal &amp; Waktu</label>
+            <input id="f-datetime" type="datetime-local" class="inp">
+            <p class="err" data-err="datetime"></p>
           </div>
-          <div id="calcInfo" class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></div>
+          <div>
+            <label class="lbl">Simbol / Pair</label>
+            <input id="f-symbol" list="symbolList" class="inp" placeholder="XAUUSD" autocomplete="off" autocapitalize="characters">
+            <datalist id="symbolList"><option>XAUUSD</option><option>BTCUSDT</option><option>ETHUSDT</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>NAS100</option><option>BBCA</option></datalist>
+            <p class="err" data-err="symbol"></p>
+          </div>
+          <div>
+            <label class="lbl">Sesi Pasar</label>
+            <select id="f-session" class="inp"><option>Asia</option><option>London</option><option>New York</option></select>
+          </div>
+          <div class="col-span-2 sm:col-span-4">
+            <label class="lbl">Arah</label>
+            <div id="dirSeg" class="seg">
+              <button type="button" class="long" data-dir="LONG"><i class="fa-solid fa-arrow-trend-up mr-1"></i> LONG / BUY</button>
+              <button type="button" class="short" data-dir="SHORT"><i class="fa-solid fa-arrow-trend-down mr-1"></i> SHORT / SELL</button>
+            </div>
+            <input type="hidden" id="f-direction" value="LONG">
+          </div>
         </div>
+      </div>
 
-        <!-- Psikologi -->
-        <div>
-          <p class="text-xs font-semibold text-emerald-400 mb-2"><i class="fa-solid fa-brain mr-1"></i> PSIKOLOGI &amp; EVALUASI</p>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <div>
-              <label class="lbl">Setup / Strategi</label>
-              <input id="f-setup" list="setupList" class="inp" placeholder="Breakout, SMC, ..." autocomplete="off">
-              <datalist id="setupList"><option>Breakout</option><option>Supply &amp; Demand</option><option>Pullback</option><option>SMC</option><option>Reversal</option><option>Trend Following</option><option>Scalping</option></datalist>
-              <p class="err" data-err="setup"></p>
+      <!-- Harga & risiko -->
+      <div>
+        <p class="text-xs font-semibold text-emerald-400 mb-2"><i class="fa-solid fa-coins mr-1"></i> HARGA &amp; RISIKO</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div><label class="lbl">Harga Entry</label><input id="f-entry" type="number" inputmode="decimal" step="any" class="inp mono"><p class="err" data-err="entry"></p></div>
+          <div><label class="lbl">Stop Loss</label><input id="f-sl" type="number" inputmode="decimal" step="any" class="inp mono"><p class="err" data-err="sl"></p></div>
+          <div><label class="lbl">Take Profit</label><input id="f-tp" type="number" inputmode="decimal" step="any" class="inp mono"><p class="err" data-err="tp"></p></div>
+          <div><label class="lbl">Exit Aktual</label><input id="f-exit" type="number" inputmode="decimal" step="any" class="inp mono"><p class="err" data-err="exit"></p></div>
+          <div><label class="lbl">Size (Lot/Unit)</label><input id="f-size" type="number" inputmode="decimal" step="any" min="0" class="inp mono"><p class="err" data-err="size"></p></div>
+          <div>
+            <label class="lbl" title="Nilai $ per 1 poin harga per 1 lot/unit. XAUUSD=100, Forex=100000, Crypto=1">Multiplier</label>
+            <input id="f-mult" type="number" inputmode="decimal" step="any" min="0" class="inp mono"><p class="err" data-err="mult"></p>
+          </div>
+          <div class="col-span-2">
+            <label class="lbl flex items-center justify-between">
+              <span>Net P&amp;L ($)</span>
+              <button type="button" id="btnAutoPnl" class="normal-case tracking-normal text-emerald-400 hover:text-emerald-300 text-[11px]"><i class="fa-solid fa-wand-magic-sparkles"></i> Hitung otomatis</button>
+            </label>
+            <input id="f-pnl" type="number" inputmode="decimal" step="any" class="inp mono" placeholder="Otomatis, bisa diedit (komisi/swap)">
+            <p class="err" data-err="pnl"></p>
+          </div>
+        </div>
+        <div id="calcInfo" class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"></div>
+        <div id="calcWarn" class="mt-2 space-y-1"></div>
+      </div>
+
+      <!-- Psikologi -->
+      <div>
+        <p class="text-xs font-semibold text-emerald-400 mb-2"><i class="fa-solid fa-brain mr-1"></i> PSIKOLOGI &amp; EVALUASI</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div>
+            <label class="lbl">Setup / Strategi</label>
+            <input id="f-setup" list="setupList" class="inp" placeholder="Breakout, SMC, ..." autocomplete="off">
+            <datalist id="setupList"><option>Breakout</option><option>Supply &amp; Demand</option><option>Pullback</option><option>SMC</option><option>Reversal</option><option>Trend Following</option><option>Scalping</option></datalist>
+            <p class="err" data-err="setup"></p>
+          </div>
+          <div>
+            <label class="lbl">Kondisi Emosi</label>
+            <select id="f-emotion" class="inp"></select>
+          </div>
+          <div class="col-span-2 md:col-span-1">
+            <label class="lbl">Rating Disiplin</label>
+            <div id="stars" class="flex items-center h-[40px]"></div>
+            <input type="hidden" id="f-discipline" value="3">
+          </div>
+          <div class="col-span-2 md:col-span-3">
+            <label class="lbl">Catatan Jurnal</label>
+            <textarea id="f-notes" rows="3" class="inp" placeholder="Alasan entry, apa yang berjalan baik, apa yang perlu diperbaiki..."></textarea>
+          </div>
+          <div class="col-span-2 md:col-span-3">
+            <label class="lbl">Link Screenshot Chart (URL gambar)</label>
+            <div class="flex gap-2">
+              <input id="f-shot" type="url" class="inp" placeholder="https://...">
+              <button type="button" id="btnPreviewShot" class="btn btn-ghost"><i class="fa-regular fa-image"></i><span class="hidden sm:inline">Preview</span></button>
             </div>
-            <div>
-              <label class="lbl">Kondisi Emosi</label>
-              <select id="f-emotion" class="inp"></select>
-            </div>
-            <div>
-              <label class="lbl">Rating Disiplin</label>
-              <div id="stars" class="flex items-center h-[38px]"></div>
-              <input type="hidden" id="f-discipline" value="3">
-            </div>
-            <div class="col-span-2 md:col-span-3">
-              <label class="lbl">Catatan Jurnal</label>
-              <textarea id="f-notes" rows="3" class="inp" placeholder="Alasan entry, apa yang berjalan baik, apa yang perlu diperbaiki..."></textarea>
-            </div>
-            <div class="col-span-2 md:col-span-3">
-              <label class="lbl">Link Screenshot Chart (URL gambar)</label>
-              <div class="flex gap-2">
-                <input id="f-shot" type="url" class="inp" placeholder="https://...">
-                <button type="button" id="btnPreviewShot" class="btn btn-ghost"><i class="fa-regular fa-image"></i> Preview</button>
-              </div>
-              <p class="err" data-err="shot"></p>
-            </div>
+            <p class="err" data-err="shot"></p>
           </div>
         </div>
       </div>
-      <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-zinc-800">
-        <button type="button" data-close="modalForm" class="btn btn-ghost">Batal</button>
-        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Trade</button>
-      </div>
-    </form>
-  </div>
+    </div>
+
+    <div class="sheet-foot flex items-center gap-2 px-4 sm:px-5 pt-3 sm:pt-4 border-t border-zinc-800 bg-[#111113] sm:justify-end">
+      <button type="button" data-close="modalForm" class="btn btn-ghost">Batal</button>
+      <button type="submit" class="btn btn-primary flex-1 sm:flex-none"><i class="fa-solid fa-floppy-disk"></i> Simpan Trade</button>
+    </div>
+  </form>
 </div>
 
 <!-- ================= MODAL DETAIL ================= -->
-<div id="modalDetail" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto">
-  <div class="min-h-full flex items-start sm:items-center justify-center p-3 sm:p-6">
-    <div class="card modal-enter w-full max-w-2xl shadow-2xl shadow-black">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-        <h3 class="font-semibold">Detail Trade</h3>
-        <button type="button" data-close="modalDetail" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div id="detailBody" class="p-5"></div>
-      <div id="detailFooter" class="flex items-center justify-end gap-2 px-5 py-4 border-t border-zinc-800"></div>
+<div id="modalDetail" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-6">
+  <div class="card sheet max-w-2xl shadow-2xl shadow-black">
+    <div class="grab sm:hidden"></div>
+    <div class="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-zinc-800 shrink-0">
+      <h3 class="font-semibold">Detail Trade</h3>
+      <button type="button" data-close="modalDetail" class="icon-btn" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
     </div>
+    <div id="detailBody" class="sheet-body p-4 sm:p-5"></div>
+    <div id="detailFooter" class="sheet-foot flex items-center justify-end gap-2 px-4 sm:px-5 pt-3 sm:pt-4 border-t border-zinc-800"></div>
   </div>
 </div>
 
@@ -292,7 +352,7 @@
 <div id="modalConfirm" class="hidden fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
   <div class="card modal-enter w-full max-w-md p-5 shadow-2xl shadow-black">
     <h3 id="cfTitle" class="font-semibold mb-2"></h3>
-    <p id="cfMsg" class="text-sm text-zinc-400 mb-5"></p>
+    <p id="cfMsg" class="text-sm text-zinc-400 mb-5 leading-relaxed"></p>
     <div class="flex flex-wrap justify-end gap-2">
       <button id="cfCancel" class="btn btn-ghost">Batal</button>
       <button id="cfAlt" class="btn btn-ghost hidden"></button>
@@ -303,13 +363,13 @@
 
 <!-- ================= LIGHTBOX ================= -->
 <div id="lightbox" class="hidden fixed inset-0 z-[70] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out">
-  <button class="absolute top-4 right-4 icon-btn !w-10 !h-10 text-xl"><i class="fa-solid fa-xmark"></i></button>
+  <button class="absolute top-4 right-4 icon-btn !w-10 !h-10 text-xl" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
   <img id="lbImg" class="max-w-full max-h-full rounded-lg shadow-2xl" alt="Screenshot chart">
   <p id="lbFail" class="hidden text-zinc-400 text-sm">Gambar tidak dapat dimuat. Periksa kembali link URL-nya.</p>
 </div>
 
 <!-- ================= TOAST ================= -->
-<div id="toasts" class="fixed bottom-4 right-4 z-[80] space-y-2"></div>
+<div id="toasts" class="fixed bottom-24 sm:bottom-4 left-3 right-3 sm:left-auto sm:right-4 z-[80] space-y-2 pointer-events-none flex flex-col items-stretch sm:items-end"></div>
 
 <script>
 (function () {
@@ -319,7 +379,8 @@
   const LS_TRADES = 'tj_trades_v1';
   const LS_SET = 'tj_settings_v1';
   const LS_INIT = 'tj_initialized_v1';
-  const BE_T = 1; // |P&L| < $1 dianggap Break-Even
+  const BE_T = 1;     // |P&L| < $1 dianggap Break-Even
+  const PAGE = 20;    // jumlah trade per halaman
   const EMOTIONS = ['Tenang / Disiplin', 'FOMO', 'Serakah', 'Ragu-ragu', 'Balas Dendam / Revenge'];
   const EMO_STYLE = {
     'Tenang / Disiplin': 'background:rgba(16,185,129,.12);color:#34d399;border-color:rgba(16,185,129,.3)',
@@ -331,12 +392,15 @@
 
   let trades = [];
   let settings = { initialBalance: 10000 };
-  let filters = { q: '', symbol: '', status: '', dir: '', emotion: '' };
+  let filters = { q: '', symbol: '', status: '', dir: '', emotion: '', sort: 'new' };
+  let visible = PAGE;
   let editingId = null;
   let pnlManual = false;
   let multTouched = false;
   let setupMeta = [];
+  let fullLabels = [];
   let eqChart, distChart, setupChart;
+  const mq = window.matchMedia('(max-width: 639px)');
 
   /* ===================== HELPER ===================== */
   const $ = (s, r) => (r || document).querySelector(s);
@@ -354,16 +418,33 @@
     if (n < 0) return '-$' + s;
     return (sign && n > 0 ? '+' : '') + '$' + s;
   }
+  // Format ringkas agar angka besar tidak meluber di HP (>= $100K jadi K / M / B)
+  function fmtCompact(n, sign) {
+    if (!isNum(n)) return '-';
+    const a = Math.abs(n);
+    let s;
+    if (a >= 1e9) s = (a / 1e9).toFixed(2) + 'B';
+    else if (a >= 1e6) s = (a / 1e6).toFixed(2) + 'M';
+    else if (a >= 1e5) s = (a / 1e3).toFixed(1) + 'K';
+    else s = a.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (n < 0 ? '-' : (sign && n > 0 ? '+' : '')) + '$' + s;
+  }
+  const fmtAxis = v => {
+    const a = Math.abs(v), s = v < 0 ? '-' : '';
+    if (a >= 1e6) return s + '$' + (a / 1e6).toFixed(1) + 'M';
+    if (a >= 1e4) return s + '$' + (a / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'k';
+    return s + '$' + a.toLocaleString('en-US');
+  };
   const fmtPrice = n => isNum(n) ? Number(n).toLocaleString('en-US', { maximumFractionDigits: 5 }) : '-';
   const fmtDate = iso => {
     const d = new Date(iso);
     if (isNaN(d)) return '-';
     return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
-  const fmtShort = iso => {
+  const fmtDay = iso => {
     const d = new Date(iso);
     if (isNaN(d)) return '-';
-    return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
   };
   const toLocalInput = d => {
     const p = n => String(n).padStart(2, '0');
@@ -473,7 +554,7 @@
     const s = list.slice().sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     const init = settings.initialBalance;
     let eq = init, peak = init, maxDD = 0, maxDDabs = 0;
-    const labels = ['Awal'], eqData = [init];
+    const labels = ['Awal'], full = ['Modal awal'], eqData = [init];
     let gp = 0, gl = 0, w = 0, l = 0, be = 0, winSum = 0, lossSum = 0;
     let best = null, worst = null, rSum = 0, rCnt = 0;
     let longT = 0, longW = 0, shortT = 0, shortW = 0;
@@ -483,9 +564,10 @@
       const p = t.pnl, st = getStatus(p);
       eq += p;
       if (eq > peak) peak = eq;
-      const dd = peak > 0 ? (peak - eq) / peak * 100 : 0;
+      const dd = peak > 0 ? Math.min(100, (peak - eq) / peak * 100) : 0; // dibatasi 100%
       if (dd > maxDD) { maxDD = dd; maxDDabs = peak - eq; }
-      labels.push(fmtShort(t.datetime));
+      labels.push(fmtDay(t.datetime));
+      full.push(fmtDate(t.datetime));
       eqData.push(r2(eq));
 
       if (p > 0) gp += p; else if (p < 0) gl += -p;
@@ -519,19 +601,19 @@
       best, worst,
       longT, longWR: longT ? longW / longT : null,
       shortT, shortWR: shortT ? shortW / shortT : null,
-      labels, eqData, bySetup
+      labels, full, eqData, bySetup
     };
   }
 
   /* ===================== RENDER KPI ===================== */
   function kpiCard(o) {
-    return `<div class="card p-4 relative overflow-hidden">
-      <div class="flex items-start justify-between">
-        <p class="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">${o.label}</p>
-        <i class="fa-solid ${o.icon} ${o.iconColor || 'text-zinc-600'} text-sm"></i>
+    return `<div class="card p-3 sm:p-4 min-w-0 ${o.cls || ''}" ${o.tint ? `style="background-image:linear-gradient(135deg,${o.tint},transparent 65%)"` : ''} ${o.title ? `title="${esc(o.title)}"` : ''}>
+      <div class="flex items-start justify-between gap-2">
+        <p class="text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-500 font-medium leading-tight">${o.label}</p>
+        <i class="fa-solid ${o.icon} ${o.iconColor || 'text-zinc-600'} text-xs sm:text-sm mt-0.5"></i>
       </div>
-      <p class="mono text-xl sm:text-2xl font-semibold mt-2 ${o.color || 'text-zinc-100'}">${o.value}</p>
-      <div class="text-xs text-zinc-500 mt-1">${o.sub || ''}</div>
+      <p class="mono font-semibold mt-1.5 truncate ${o.big ? 'text-3xl sm:text-4xl' : 'text-lg sm:text-2xl'} ${o.color || 'text-zinc-100'}">${o.value}</p>
+      <div class="text-[11px] sm:text-xs text-zinc-500 mt-1 leading-snug">${o.sub || ''}</div>
       ${o.bar != null ? `<div class="h-1.5 bg-zinc-800 rounded-full mt-2 overflow-hidden"><div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${Math.min(100, Math.max(0, o.bar))}%"></div></div>` : ''}
     </div>`;
   }
@@ -539,31 +621,35 @@
   function renderKPIs(st) {
     const has = st.total > 0;
     const pct = v => v === null ? '-' : (v * 100).toFixed(1) + '%';
-    $('#kpiMain').innerHTML = [
-      kpiCard({ label: 'Net P&L', icon: 'fa-sack-dollar', iconColor: 'text-emerald-500', value: fmtMoney(st.net, true), color: pnlClass(st.net),
-        sub: `<span class="${pnlClass(st.netPct)} mono">${st.netPct >= 0 ? '+' : ''}${st.netPct.toFixed(2)}%</span> · Saldo ${fmtMoney(st.balance)}` }),
+    const wrBar = (v, col) => `<div class="h-1.5 bg-zinc-800 rounded-full mt-1.5 overflow-hidden"><div class="h-full ${col} rounded-full transition-all" style="width:${v === null ? 0 : v * 100}%"></div></div>`;
+    const netPctTxt = (st.netPct >= 0 ? '+' : '') + st.netPct.toLocaleString('en-US', { maximumFractionDigits: 2 }) + '%';
+    const warn = has && st.balance <= 0 ? '<div class="text-amber-400 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Saldo negatif — cek multiplier / harga trade.</div>' : '';
+
+    $('#kpiGrid').innerHTML = [
+      kpiCard({ cls: 'col-span-2', big: true, tint: st.net >= 0 ? 'rgba(16,185,129,.10)' : 'rgba(244,63,94,.10)',
+        label: 'Net P&L', icon: 'fa-sack-dollar', iconColor: 'text-emerald-500',
+        value: fmtCompact(st.net, true), title: fmtMoney(st.net, true), color: pnlClass(st.net),
+        sub: `<span class="${pnlClass(st.netPct)} mono font-semibold">${netPctTxt}</span> <span class="text-zinc-700">·</span> Saldo <span class="mono text-zinc-300">${fmtCompact(st.balance)}</span> <span class="text-zinc-700">·</span> Modal <span class="mono">${fmtCompact(settings.initialBalance)}</span>${warn}` }),
       kpiCard({ label: 'Win Rate', icon: 'fa-bullseye', iconColor: 'text-sky-500', value: has ? (st.winRate * 100).toFixed(1) + '%' : '-',
         sub: `W ${st.w} · L ${st.l} · BE ${st.be}`, bar: has ? st.winRate * 100 : null }),
-      kpiCard({ label: 'Avg R:R (Aktual)', icon: 'fa-scale-balanced', iconColor: 'text-violet-500', value: st.avgR === null ? '-' : '1 : ' + st.avgR.toFixed(2),
-        color: st.avgR === null ? '' : pnlClass(st.avgR), sub: 'Rata-rata R multiple' }),
+      kpiCard({ label: 'Avg R:R (Aktual)', icon: 'fa-scale-balanced', iconColor: 'text-violet-500',
+        value: st.avgR === null ? '-' : (st.avgR > 0 ? '+' : '') + st.avgR.toFixed(2) + 'R',
+        color: st.avgR === null ? '' : pnlClass(st.avgR),
+        sub: st.avgR !== null && st.avgR > 0 ? `R:R rata-rata 1 : ${st.avgR.toFixed(2)}` : 'Rata-rata R multiple' }),
       kpiCard({ label: 'Profit Factor', icon: 'fa-percent', iconColor: 'text-amber-500', value: st.pf === null ? '-' : (st.pf === Infinity ? '∞' : st.pf.toFixed(2)),
-        color: st.pf === null ? '' : (st.pf >= 1 ? 'text-emerald-400' : 'text-rose-400'), sub: `GP ${fmtMoney(st.gp)} / GL ${fmtMoney(st.gl)}` }),
-      kpiCard({ label: 'Expectancy', icon: 'fa-calculator', iconColor: 'text-cyan-500', value: st.expectancy === null ? '-' : fmtMoney(st.expectancy, true),
-        color: st.expectancy === null ? '' : pnlClass(st.expectancy), sub: 'Per trade (rata-rata)' }),
+        color: st.pf === null ? '' : (st.pf >= 1 ? 'text-emerald-400' : 'text-rose-400'), sub: `GP ${fmtCompact(st.gp)} / GL ${fmtCompact(st.gl)}` }),
+      kpiCard({ label: 'Expectancy', icon: 'fa-calculator', iconColor: 'text-cyan-500', value: st.expectancy === null ? '-' : fmtCompact(st.expectancy, true),
+        title: st.expectancy === null ? '' : fmtMoney(st.expectancy, true), color: st.expectancy === null ? '' : pnlClass(st.expectancy), sub: 'Per trade (rata-rata)' }),
       kpiCard({ label: 'Max Drawdown', icon: 'fa-arrow-trend-down', iconColor: 'text-rose-500', value: has ? st.maxDD.toFixed(2) + '%' : '-',
-        color: has && st.maxDD > 0 ? 'text-rose-400' : '', sub: has ? '-' + fmtMoney(st.maxDDabs).replace('-', '') + ' dari puncak' : '' })
-    ].join('');
-
-    const wrBar = (v, col) => `<div class="h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden"><div class="h-full ${col} rounded-full" style="width:${v === null ? 0 : v * 100}%"></div></div>`;
-    $('#kpiExtra').innerHTML = [
+        color: has && st.maxDD > 0 ? 'text-rose-400' : '', sub: has ? fmtCompact(Math.abs(st.maxDDabs)) + ' dari puncak' : '' }),
       kpiCard({ label: 'Total Trades', icon: 'fa-hashtag', value: st.total, sub: `${st.longT} Long · ${st.shortT} Short` }),
-      kpiCard({ label: 'Best Win', icon: 'fa-trophy', iconColor: 'text-emerald-500', value: st.best === null ? '-' : fmtMoney(st.best, true), color: 'text-emerald-400', sub: `Avg Win ${st.w ? fmtMoney(st.avgWin) : '-'}` }),
-      kpiCard({ label: 'Worst Loss', icon: 'fa-triangle-exclamation', iconColor: 'text-rose-500', value: st.worst === null ? '-' : fmtMoney(st.worst), color: 'text-rose-400', sub: `Avg Loss ${st.l ? fmtMoney(st.avgLoss) : '-'}` }),
-      `<div class="card p-4">
-        <div class="flex items-start justify-between"><p class="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Win Rate Long vs Short</p><i class="fa-solid fa-arrows-left-right text-zinc-600 text-sm"></i></div>
-        <div class="mt-2 space-y-2 text-xs">
-          <div><div class="flex justify-between"><span class="text-zinc-400">LONG <span class="text-zinc-600">(${st.longT})</span></span><span class="mono text-emerald-400">${pct(st.longWR)}</span></div>${wrBar(st.longWR, 'bg-emerald-500')}</div>
-          <div><div class="flex justify-between"><span class="text-zinc-400">SHORT <span class="text-zinc-600">(${st.shortT})</span></span><span class="mono text-rose-400">${pct(st.shortWR)}</span></div>${wrBar(st.shortWR, 'bg-rose-500')}</div>
+      kpiCard({ label: 'Best Win', icon: 'fa-trophy', iconColor: 'text-emerald-500', value: st.best === null ? '-' : fmtCompact(st.best, true), title: st.best === null ? '' : fmtMoney(st.best, true), color: 'text-emerald-400', sub: `Avg Win ${st.w ? fmtCompact(st.avgWin) : '-'}` }),
+      kpiCard({ label: 'Worst Loss', icon: 'fa-triangle-exclamation', iconColor: 'text-rose-500', value: st.worst === null ? '-' : fmtCompact(st.worst), title: st.worst === null ? '' : fmtMoney(st.worst), color: 'text-rose-400', sub: `Avg Loss ${st.l ? fmtCompact(st.avgLoss) : '-'}` }),
+      `<div class="card p-3 sm:p-4 col-span-2 min-w-0">
+        <div class="flex items-start justify-between"><p class="text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Win Rate Long vs Short</p><i class="fa-solid fa-arrows-left-right text-zinc-600 text-xs sm:text-sm"></i></div>
+        <div class="grid grid-cols-2 gap-4 mt-2.5">
+          <div><div class="flex justify-between items-baseline text-xs"><span class="text-zinc-400">LONG <span class="text-zinc-600">(${st.longT})</span></span><span class="mono text-base font-semibold text-emerald-400">${pct(st.longWR)}</span></div>${wrBar(st.longWR, 'bg-emerald-500')}</div>
+          <div><div class="flex justify-between items-baseline text-xs"><span class="text-zinc-400">SHORT <span class="text-zinc-600">(${st.shortT})</span></span><span class="mono text-base font-semibold text-rose-400">${pct(st.shortWR)}</span></div>${wrBar(st.shortWR, 'bg-rose-500')}</div>
         </div>
       </div>`
     ].join('');
@@ -574,19 +660,27 @@
     Chart.defaults.color = '#a1a1aa';
     Chart.defaults.borderColor = 'rgba(113,113,122,.22)';
     Chart.defaults.font.family = 'Inter, sans-serif';
+    Chart.defaults.font.size = 11;
+    Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
     eqChart = new Chart($('#c-equity'), {
       type: 'line',
       data: { labels: [], datasets: [
-        { label: 'Ekuitas', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.12)', fill: true, tension: .25, pointRadius: 2.5, pointHoverRadius: 6, borderWidth: 2 },
+        { label: 'Ekuitas', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.12)', fill: true, tension: .25, pointRadius: 3, pointHoverRadius: 6, borderWidth: 2 },
         { label: 'Modal Awal', data: [], borderColor: '#71717a', borderDash: [6, 6], pointRadius: 0, borderWidth: 1, fill: false }
       ] },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false, resizeDelay: 80,
         interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { labels: { boxWidth: 10, usePointStyle: true } },
-          tooltip: { backgroundColor: '#18181b', borderColor: '#3f3f46', borderWidth: 1, callbacks: { label: c => c.dataset.label + ': ' + fmtMoney(c.parsed.y) } } },
-        scales: { y: { ticks: { callback: v => '$' + Number(v).toLocaleString('en-US') } }, x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 20 } } }
+        plugins: {
+          legend: { labels: { boxWidth: 8, usePointStyle: true } },
+          tooltip: { backgroundColor: '#18181b', borderColor: '#3f3f46', borderWidth: 1,
+            callbacks: { title: items => items.length ? (fullLabels[items[0].dataIndex] || '') : '', label: c => c.dataset.label + ': ' + fmtMoney(c.parsed.y) } }
+        },
+        scales: {
+          y: { ticks: { callback: fmtAxis, maxTicksLimit: 6 } },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 18, maxTicksLimit: 6 } }
+        }
       }
     });
 
@@ -596,52 +690,71 @@
         const a = chart.chartArea; if (!a) return;
         const total = chart.data.datasets[0].data.reduce((x, y) => x + y, 0);
         const ctx = chart.ctx, cx = (a.left + a.right) / 2, cy = (a.top + a.bottom) / 2;
+        const size = Math.max(18, Math.min(30, (a.right - a.left) / 7));
         ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#f4f4f5'; ctx.font = '700 26px Inter'; ctx.fillText(total, cx, cy - 8);
-        ctx.fillStyle = '#a1a1aa'; ctx.font = '12px Inter'; ctx.fillText('Total Trade', cx, cy + 14);
+        ctx.fillStyle = '#f4f4f5'; ctx.font = '700 ' + size + 'px Inter'; ctx.fillText(total, cx, cy - 6);
+        ctx.fillStyle = '#a1a1aa'; ctx.font = '11px Inter'; ctx.fillText('Total Trade', cx, cy + size * 0.6);
         ctx.restore();
       }
     };
     distChart = new Chart($('#c-dist'), {
       type: 'doughnut',
       data: { labels: ['Win', 'Loss', 'Break-Even'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#10b981', '#f43f5e', '#71717a'], borderColor: '#111113', borderWidth: 3, hoverOffset: 6 }] },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 16 } }, tooltip: { backgroundColor: '#18181b', borderColor: '#3f3f46', borderWidth: 1 } } },
+      options: { responsive: true, maintainAspectRatio: false, resizeDelay: 80, cutout: '68%',
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 14 } }, tooltip: { backgroundColor: '#18181b', borderColor: '#3f3f46', borderWidth: 1 } } },
       plugins: [centerText]
     });
 
     setupChart = new Chart($('#c-setup'), {
       type: 'bar',
-      data: { labels: [], datasets: [{ label: 'Net P&L', data: [], backgroundColor: [], borderRadius: 6, maxBarThickness: 64 }] },
+      data: { labels: [], datasets: [{ label: 'Net P&L', data: [], backgroundColor: [], borderRadius: 6, maxBarThickness: 48 }] },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false, resizeDelay: 80, indexAxis: 'x',
         plugins: { legend: { display: false },
           tooltip: { backgroundColor: '#18181b', borderColor: '#3f3f46', borderWidth: 1,
-            callbacks: { label: c => 'Net P&L: ' + fmtMoney(c.parsed.y, true),
-              afterLabel: c => { const m = setupMeta[c.dataIndex]; return m ? `${m.n} trade · WR ${(m.w / m.n * 100).toFixed(0)}%` : ''; } } } },
-        scales: { y: { ticks: { callback: v => '$' + Number(v).toLocaleString('en-US') } }, x: { grid: { display: false } } }
+            callbacks: {
+              label: c => 'Net P&L: ' + fmtMoney(c.chart.options.indexAxis === 'y' ? c.parsed.x : c.parsed.y, true),
+              afterLabel: c => { const m = setupMeta[c.dataIndex]; return m ? `${m.n} trade · WR ${(m.w / m.n * 100).toFixed(0)}%` : ''; }
+            } } },
+        scales: { x: { grid: { display: false } }, y: { ticks: { callback: fmtAxis } } }
       }
     });
   }
 
+  // Bar horizontal di HP agar label setup terbaca, vertikal di layar lebar
+  function applySetupLayout(horiz, count) {
+    setupChart.options.indexAxis = horiz ? 'y' : 'x';
+    const val = horiz ? 'x' : 'y', cat = horiz ? 'y' : 'x';
+    setupChart.options.scales = {};
+    setupChart.options.scales[val] = { ticks: { callback: fmtAxis, maxTicksLimit: 6 } };
+    setupChart.options.scales[cat] = { grid: { display: false }, ticks: { autoSkip: false } };
+    $('#setupBox').style.height = horiz ? Math.max(170, count * 46 + 50) + 'px' : '';
+  }
+
   function updateCharts(st) {
     const up = st.net >= 0;
+    fullLabels = st.full;
     eqChart.data.labels = st.labels;
-    eqChart.data.datasets[0].data = st.eqData;
-    eqChart.data.datasets[0].borderColor = up ? '#10b981' : '#f43f5e';
-    eqChart.data.datasets[0].backgroundColor = up ? 'rgba(16,185,129,.12)' : 'rgba(244,63,94,.12)';
+    const d0 = eqChart.data.datasets[0];
+    d0.data = st.eqData;
+    d0.pointRadius = st.eqData.length > 40 ? 0 : 3;
+    d0.borderColor = up ? '#10b981' : '#f43f5e';
+    d0.backgroundColor = up ? 'rgba(16,185,129,.12)' : 'rgba(244,63,94,.12)';
     eqChart.data.datasets[1].data = st.labels.map(() => settings.initialBalance);
     eqChart.update();
-    $('#eqNote').textContent = st.total ? `${st.total} trade · Saldo ${fmtMoney(st.balance)}` : 'Belum ada data';
+    $('#eqNote').textContent = st.total ? `${st.total} trade · Saldo ${fmtCompact(st.balance)}` : 'Belum ada data';
 
     distChart.data.datasets[0].data = [st.w, st.l, st.be];
     distChart.update();
 
     const keys = Object.keys(st.bySetup).sort((a, b) => st.bySetup[b].pnl - st.bySetup[a].pnl);
     setupMeta = keys.map(k => st.bySetup[k]);
+    applySetupLayout(mq.matches, keys.length);
     setupChart.data.labels = keys;
     setupChart.data.datasets[0].data = keys.map(k => r2(st.bySetup[k].pnl));
     setupChart.data.datasets[0].backgroundColor = keys.map(k => st.bySetup[k].pnl >= 0 ? 'rgba(16,185,129,.8)' : 'rgba(244,63,94,.8)');
     setupChart.update();
+    setupChart.resize();
   }
 
   /* ===================== TABEL & FILTER ===================== */
@@ -651,19 +764,26 @@
     symSel.innerHTML = '<option value="">Semua Simbol</option>' + syms.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
     emoSel.innerHTML = '<option value="">Semua Emosi</option>' + EMOTIONS.map(e => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
     if (!syms.includes(filters.symbol)) filters.symbol = '';
-    symSel.value = filters.symbol; emoSel.value = filters.emotion;
+    symSel.value = filters.symbol; emoSel.value = filters.emotion; $('#fSort').value = filters.sort;
   }
 
   function getFiltered() {
     const q = filters.q.trim().toLowerCase();
-    return trades.filter(t => {
+    const list = trades.filter(t => {
       if (filters.symbol && t.symbol !== filters.symbol) return false;
       if (filters.status && getStatus(t.pnl) !== filters.status) return false;
       if (filters.dir && t.direction !== filters.dir) return false;
       if (filters.emotion && t.emotion !== filters.emotion) return false;
       if (q && !(`${t.symbol} ${t.setup} ${t.notes} ${t.emotion} ${t.session}`.toLowerCase().includes(q))) return false;
       return true;
-    }).sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+    });
+    const by = {
+      new: (a, b) => new Date(b.datetime) - new Date(a.datetime),
+      old: (a, b) => new Date(a.datetime) - new Date(b.datetime),
+      best: (a, b) => b.pnl - a.pnl,
+      worst: (a, b) => a.pnl - b.pnl
+    };
+    return list.sort(by[filters.sort] || by.new);
   }
 
   const statusBadge = s => ({
@@ -672,38 +792,86 @@
     BE: '<span class="badge" style="background:rgba(113,113,122,.18);color:#a1a1aa;border-color:rgba(113,113,122,.35)">BE</span>'
   }[s]);
   const dirBadge = d => d === 'LONG'
-    ? '<span class="text-emerald-400 text-xs font-semibold"><i class="fa-solid fa-arrow-trend-up mr-1"></i>LONG</span>'
-    : '<span class="text-rose-400 text-xs font-semibold"><i class="fa-solid fa-arrow-trend-down mr-1"></i>SHORT</span>';
+    ? '<span class="text-emerald-400 text-xs font-semibold whitespace-nowrap"><i class="fa-solid fa-arrow-trend-up mr-1"></i>LONG</span>'
+    : '<span class="text-rose-400 text-xs font-semibold whitespace-nowrap"><i class="fa-solid fa-arrow-trend-down mr-1"></i>SHORT</span>';
   const emoBadge = e => `<span class="badge" style="${EMO_STYLE[e] || 'background:#27272a;color:#a1a1aa;border-color:#3f3f46'}">${esc(e)}</span>`;
   const starsHtml = n => '<span class="text-amber-400 text-xs whitespace-nowrap">' + '★'.repeat(n) + '<span class="text-zinc-700">' + '★'.repeat(5 - n) + '</span></span>';
+  const rTxt = r => r === null ? '-' : (r > 0 ? '+' : '') + r.toFixed(2) + 'R';
+
+  function actionBtns(t, shot) {
+    return `${shot ? `<button class="icon-btn" title="Lihat screenshot" data-act="shot" data-id="${t.id}"><i class="fa-regular fa-image"></i></button>` : ''}
+      <button class="icon-btn" title="Edit" data-act="edit" data-id="${t.id}"><i class="fa-solid fa-pen"></i></button>
+      <button class="icon-btn del" title="Hapus" data-act="del" data-id="${t.id}"><i class="fa-solid fa-trash"></i></button>`;
+  }
+
+  function rowHtml(t) {
+    const st = getStatus(t.pnl), r = actualR(t), shot = safeUrl(t.screenshot);
+    return `<tr class="border-t border-zinc-800/80 hover:bg-zinc-900/60 transition">
+      <td class="px-3 py-3 whitespace-nowrap text-zinc-400 text-xs">${fmtDate(t.datetime)}</td>
+      <td class="px-3 py-3 font-semibold">${esc(t.symbol)}</td>
+      <td class="px-3 py-3">${dirBadge(t.direction)}</td>
+      <td class="px-3 py-3 text-zinc-400 text-xs">${esc(t.session)}</td>
+      <td class="px-3 py-3 mono text-xs whitespace-nowrap text-zinc-300">${fmtPrice(t.entry)} <span class="text-zinc-600">→</span> ${fmtPrice(t.exit)}</td>
+      <td class="px-3 py-3 mono text-xs text-zinc-300">${fmtPrice(t.size)}</td>
+      <td class="px-3 py-3 mono text-right font-semibold ${pnlClass(t.pnl)}" title="${esc(fmtMoney(t.pnl, true))}">${fmtCompact(t.pnl, true)}</td>
+      <td class="px-3 py-3 mono text-right text-xs ${r === null ? 'text-zinc-600' : pnlClass(r)}">${rTxt(r)}</td>
+      <td class="px-3 py-3">${statusBadge(st)}</td>
+      <td class="px-3 py-3 text-xs text-zinc-300">${esc(t.setup) || '<span class="text-zinc-600">-</span>'}</td>
+      <td class="px-3 py-3">${emoBadge(t.emotion)}</td>
+      <td class="px-3 py-3">${starsHtml(t.discipline)}</td>
+      <td class="px-3 py-3 text-right whitespace-nowrap">
+        <button class="icon-btn" title="Detail" data-act="view" data-id="${t.id}"><i class="fa-regular fa-eye"></i></button>
+        ${actionBtns(t, shot)}
+      </td>
+    </tr>`;
+  }
+
+  function cardHtml(t) {
+    const st = getStatus(t.pnl), r = actualR(t), shot = safeUrl(t.screenshot);
+    return `<div class="tcard" data-act="view" data-id="${t.id}">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-base">${esc(t.symbol)}</span>${dirBadge(t.direction)}${statusBadge(st)}</div>
+          <p class="text-[11px] text-zinc-500 mt-1">${fmtDate(t.datetime)} · ${esc(t.session)}</p>
+        </div>
+        <div class="text-right shrink-0">
+          <p class="mono font-bold text-lg leading-tight ${pnlClass(t.pnl)}">${fmtCompact(t.pnl, true)}</p>
+          <p class="mono text-[11px] ${r === null ? 'text-zinc-600' : pnlClass(r)}">${rTxt(r)}</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-3">
+        <div class="col-span-2 min-w-0"><p class="cap">Entry → Exit</p><p class="mono text-xs text-zinc-200 truncate">${fmtPrice(t.entry)} <span class="text-zinc-600">→</span> ${fmtPrice(t.exit)}</p></div>
+        <div class="min-w-0"><p class="cap">Size</p><p class="mono text-xs text-zinc-200 truncate">${fmtPrice(t.size)}</p></div>
+      </div>
+      <div class="flex items-center justify-between gap-2 mt-2.5">
+        <p class="text-xs text-zinc-300 truncate min-w-0"><span class="cap mr-1">Setup</span>${esc(t.setup) || '-'}</p>
+        ${starsHtml(t.discipline)}
+      </div>
+      ${t.notes ? `<p class="text-xs text-zinc-500 mt-2 line-clamp-2">${esc(t.notes)}</p>` : ''}
+      <div class="flex items-center justify-between gap-2 mt-2.5">
+        <div class="min-w-0">${emoBadge(t.emotion)}</div>
+        <div class="flex items-center shrink-0 -mr-1.5">${actionBtns(t, shot)}</div>
+      </div>
+    </div>`;
+  }
+
+  function updateFilterBadge() {
+    const n = ['q', 'symbol', 'status', 'dir', 'emotion'].filter(k => filters[k]).length;
+    const b = $('#filterBadge');
+    b.textContent = n; b.classList.toggle('hidden', n === 0);
+  }
 
   function renderTable() {
     const list = getFiltered();
+    const shown = list.slice(0, visible);
+    const more = list.length - shown.length;
     $('#countInfo').textContent = `(${list.length} dari ${trades.length})`;
     $('#emptyState').classList.toggle('hidden', list.length > 0);
-    $('#tbody').innerHTML = list.map(t => {
-      const st = getStatus(t.pnl), r = actualR(t), shot = safeUrl(t.screenshot);
-      return `<tr class="border-t border-zinc-800/80 hover:bg-zinc-900/60 transition">
-        <td class="px-3 py-3 whitespace-nowrap text-zinc-400 text-xs">${fmtDate(t.datetime)}</td>
-        <td class="px-3 py-3 font-semibold">${esc(t.symbol)}</td>
-        <td class="px-3 py-3">${dirBadge(t.direction)}</td>
-        <td class="px-3 py-3 text-zinc-400 text-xs">${esc(t.session)}</td>
-        <td class="px-3 py-3 mono text-xs whitespace-nowrap text-zinc-300">${fmtPrice(t.entry)} <span class="text-zinc-600">→</span> ${fmtPrice(t.exit)}</td>
-        <td class="px-3 py-3 mono text-xs text-zinc-300">${fmtPrice(t.size)}</td>
-        <td class="px-3 py-3 mono text-right font-semibold ${pnlClass(t.pnl)}">${fmtMoney(t.pnl, true)}</td>
-        <td class="px-3 py-3 mono text-right text-xs ${r === null ? 'text-zinc-600' : pnlClass(r)}">${r === null ? '-' : (r > 0 ? '+' : '') + r.toFixed(2) + 'R'}</td>
-        <td class="px-3 py-3">${statusBadge(st)}</td>
-        <td class="px-3 py-3 text-xs text-zinc-300">${esc(t.setup) || '<span class="text-zinc-600">-</span>'}</td>
-        <td class="px-3 py-3">${emoBadge(t.emotion)}</td>
-        <td class="px-3 py-3">${starsHtml(t.discipline)}</td>
-        <td class="px-3 py-3 text-right whitespace-nowrap">
-          ${shot ? `<button class="icon-btn" title="Lihat screenshot" data-act="shot" data-id="${t.id}"><i class="fa-regular fa-image"></i></button>` : ''}
-          <button class="icon-btn" title="Detail" data-act="view" data-id="${t.id}"><i class="fa-regular fa-eye"></i></button>
-          <button class="icon-btn" title="Edit" data-act="edit" data-id="${t.id}"><i class="fa-solid fa-pen"></i></button>
-          <button class="icon-btn del" title="Hapus" data-act="del" data-id="${t.id}"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      </tr>`;
-    }).join('');
+    $('#tbody').innerHTML = shown.map(rowHtml).join('');
+    $('#cards').innerHTML = shown.map(cardHtml).join('');
+    $('#loadMoreWrap').classList.toggle('hidden', more <= 0);
+    $('#btnLoadMore').textContent = `Muat ${Math.min(PAGE, more)} lagi (sisa ${more})`;
+    updateFilterBadge();
   }
 
   function renderAll() {
@@ -722,7 +890,7 @@
   }
 
   function confirmBox(o) {
-    $('#cfTitle').innerHTML = o.title;
+    $('#cfTitle').textContent = o.title;
     $('#cfMsg').textContent = o.msg;
     const ok = $('#cfOk'), alt = $('#cfAlt'), cancel = $('#cfCancel');
     ok.textContent = o.okText || 'Ya, Lanjut';
@@ -753,6 +921,11 @@
   }
 
   /* ===================== FORM ===================== */
+  function setDir(v) {
+    $('#f-direction').value = v;
+    $$('#dirSeg button').forEach(b => b.classList.toggle('on', b.dataset.dir === v));
+  }
+
   function renderStars(n) {
     $('#f-discipline').value = n;
     $('#stars').innerHTML = [1, 2, 3, 4, 5].map(i => `<button type="button" class="star-btn ${i <= n ? 'on' : ''}" data-star="${i}" title="${i} bintang">★</button>`).join('') +
@@ -777,14 +950,17 @@
     const t = readForm();
     const ok = [t.entry, t.exit, t.size, t.mult].every(isNum);
     if (ok && !pnlManual) $('#f-pnl').value = r2(calcPnl(t));
-    const info = [];
-    const box = (l, v, c) => `<div class="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"><p class="text-zinc-500 text-[10px] uppercase tracking-wide">${l}</p><p class="mono font-semibold ${c || 'text-zinc-200'}">${v}</p></div>`;
+    const bal = settings.initialBalance;
+    const info = [], warns = [];
+    const box = (l, v, c) => `<div class="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 min-w-0"><p class="text-zinc-500 text-[10px] uppercase tracking-wide">${l}</p><p class="mono font-semibold truncate ${c || 'text-zinc-200'}">${v}</p></div>`;
     if ([t.entry, t.sl, t.tp].every(isNum)) {
       const rr = plannedRR(t);
       info.push(box('Planned R:R', rr === null ? '-' : '1 : ' + rr.toFixed(2), 'text-violet-400'));
       if (isNum(t.size) && isNum(t.mult)) {
-        info.push(box('Risiko ($)', fmtMoney(calcRisk(t)), 'text-rose-400'));
-        info.push(box('Potensi Reward ($)', fmtMoney(calcReward(t)), 'text-emerald-400'));
+        const risk = calcRisk(t), rp = bal > 0 ? risk / bal * 100 : 0;
+        info.push(box('Risiko', fmtCompact(risk) + ` <span class="text-[10px] text-zinc-500 font-normal">(${rp.toFixed(1)}%)</span>`, 'text-rose-400'));
+        info.push(box('Potensi Reward', fmtCompact(calcReward(t)), 'text-emerald-400'));
+        if (rp > 5) warns.push(`Risiko ${rp.toFixed(1)}% dari modal awal — cek ukuran lot atau multiplier.`);
       }
     }
     const p = toNum($('#f-pnl').value);
@@ -792,7 +968,9 @@
       const k = calcRisk(t);
       if (k > 0) info.push(box('Hasil Aktual (R)', (p / k > 0 ? '+' : '') + (p / k).toFixed(2) + 'R', pnlClass(p)));
     }
+    if (isNum(p) && Math.abs(p) > bal) warns.push(`P&L ${fmtMoney(p, true)} lebih besar dari modal awal — kemungkinan harga atau multiplier salah.`);
     $('#calcInfo').innerHTML = info.join('');
+    $('#calcWarn').innerHTML = warns.map(w => `<p class="text-xs text-amber-400 flex gap-1.5"><i class="fa-solid fa-triangle-exclamation mt-0.5"></i><span>${esc(w)}</span></p>`).join('');
   }
 
   function clearErrors() {
@@ -839,7 +1017,7 @@
       const t = trades.find(x => x.id === id); if (!t) return;
       $('#formTitle').textContent = 'Edit Trade';
       $('#f-datetime').value = t.datetime; $('#f-symbol').value = t.symbol;
-      $('#f-direction').value = t.direction; $('#f-session').value = t.session;
+      setDir(t.direction); $('#f-session').value = t.session;
       $('#f-entry').value = t.entry; $('#f-sl').value = t.sl; $('#f-tp').value = t.tp; $('#f-exit').value = t.exit;
       $('#f-size').value = t.size; $('#f-mult').value = t.mult; $('#f-pnl').value = t.pnl;
       $('#f-setup').value = t.setup; $('#f-emotion').value = t.emotion;
@@ -851,7 +1029,7 @@
       $('#formTitle').textContent = 'Tambah Trade';
       $('#tradeForm').reset();
       $('#f-datetime').value = toLocalInput(new Date());
-      $('#f-direction').value = 'LONG'; $('#f-session').value = 'London';
+      setDir('LONG'); $('#f-session').value = 'London';
       $('#f-emotion').value = EMOTIONS[0];
       $('#f-symbol').value = 'XAUUSD'; $('#f-mult').value = defaultMult('XAUUSD');
       renderStars(3);
@@ -859,7 +1037,7 @@
     }
     recalcForm();
     openModal('modalForm');
-    setTimeout(() => $('#f-symbol').focus(), 60);
+    $('#modalForm .sheet-body').scrollTop = 0;
   }
 
   function submitForm(e) {
@@ -868,38 +1046,47 @@
     if (!validate(t)) { toast('Periksa kembali isian yang ditandai merah.', 'error'); return; }
     t.screenshot = safeUrl(t.screenshot);
     t.pnl = r2(t.pnl);
-    if (editingId) {
-      const i = trades.findIndex(x => x.id === editingId);
-      if (i >= 0) trades[i] = Object.assign({ id: editingId }, t);
-      toast('Trade berhasil diperbarui.');
-    } else {
-      trades.push(Object.assign({ id: uid() }, t));
-      toast('Trade baru berhasil disimpan.');
-    }
-    saveAll(); renderAll(); closeModal('modalForm');
+    const save = () => {
+      if (editingId) {
+        const i = trades.findIndex(x => x.id === editingId);
+        if (i >= 0) trades[i] = Object.assign({ id: editingId }, t);
+        toast('Trade berhasil diperbarui.');
+      } else {
+        trades.push(Object.assign({ id: uid() }, t));
+        toast('Trade baru berhasil disimpan.');
+      }
+      saveAll(); renderAll(); closeModal('modalForm');
+    };
+    if (Math.abs(t.pnl) > settings.initialBalance) {
+      confirmBox({
+        title: 'P&L tampak tidak wajar',
+        msg: `Net P&L ${fmtMoney(t.pnl, true)} lebih besar dari modal awal ${fmtMoney(settings.initialBalance)}. Biasanya ini karena harga atau multiplier salah. Tetap simpan?`,
+        okText: 'Tetap Simpan', okClass: 'btn-primary', altText: 'Periksa Lagi', onOk: save
+      });
+    } else save();
   }
 
   /* ===================== DETAIL ===================== */
   function openDetail(id) {
     const t = trades.find(x => x.id === id); if (!t) return;
     const st = getStatus(t.pnl), r = actualR(t), rr = plannedRR(t), shot = safeUrl(t.screenshot);
-    const cell = (l, v) => `<div><p class="text-[10px] uppercase tracking-wide text-zinc-500">${l}</p><p class="mono text-sm mt-0.5">${v}</p></div>`;
+    const cell = (l, v) => `<div class="min-w-0"><p class="text-[10px] uppercase tracking-wide text-zinc-500">${l}</p><p class="mono text-sm mt-0.5 truncate">${v}</p></div>`;
     $('#detailBody').innerHTML = `
-      <div class="flex flex-wrap items-center gap-3 mb-4">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
         <span class="text-xl font-bold">${esc(t.symbol)}</span> ${dirBadge(t.direction)} ${statusBadge(st)}
-        <span class="ml-auto mono text-2xl font-bold ${pnlClass(t.pnl)}">${fmtMoney(t.pnl, true)}</span>
+        <span class="ml-auto mono text-2xl font-bold ${pnlClass(t.pnl)}">${fmtCompact(t.pnl, true)}</span>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-4 border-b border-zinc-800">
         ${cell('Tanggal', fmtDate(t.datetime))}
         ${cell('Sesi', esc(t.session))}
         ${cell('Size', fmtPrice(t.size) + ' <span class="text-zinc-600">×' + fmtPrice(t.mult) + '</span>')}
-        ${cell('Hasil (R)', r === null ? '-' : `<span class="${pnlClass(r)}">${(r > 0 ? '+' : '') + r.toFixed(2)}R</span>`)}
+        ${cell('Hasil (R)', r === null ? '-' : `<span class="${pnlClass(r)}">${rTxt(r)}</span>`)}
         ${cell('Entry', fmtPrice(t.entry))}
         ${cell('Stop Loss', '<span class="text-rose-400">' + fmtPrice(t.sl) + '</span>')}
         ${cell('Take Profit', '<span class="text-emerald-400">' + fmtPrice(t.tp) + '</span>')}
         ${cell('Exit Aktual', fmtPrice(t.exit))}
         ${cell('Planned R:R', rr === null ? '-' : '1 : ' + rr.toFixed(2))}
-        ${cell('Risiko', fmtMoney(calcRisk(t)))}
+        ${cell('Risiko', fmtCompact(calcRisk(t)))}
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4 border-b border-zinc-800">
         <div><p class="text-[10px] uppercase tracking-wide text-zinc-500">Setup</p><p class="text-sm mt-1">${esc(t.setup) || '-'}</p></div>
@@ -908,10 +1095,10 @@
       </div>
       <div class="pt-4">
         <p class="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">Catatan Jurnal</p>
-        <p class="text-sm text-zinc-300 whitespace-pre-wrap">${esc(t.notes) || '<span class="text-zinc-600">Tidak ada catatan.</span>'}</p>
+        <p class="text-sm text-zinc-300 whitespace-pre-wrap break-words">${esc(t.notes) || '<span class="text-zinc-600">Tidak ada catatan.</span>'}</p>
       </div>
       ${shot ? `<div class="pt-4">
-        <p class="text-[10px] uppercase tracking-wide text-zinc-500 mb-2">Screenshot Chart <span class="normal-case text-zinc-600">(klik untuk memperbesar)</span></p>
+        <p class="text-[10px] uppercase tracking-wide text-zinc-500 mb-2">Screenshot Chart <span class="normal-case text-zinc-600">(ketuk untuk memperbesar)</span></p>
         <img id="detailImg" src="${esc(shot)}" alt="Screenshot chart" class="w-full max-h-72 object-cover rounded-lg border border-zinc-800 cursor-zoom-in hover:opacity-90 transition">
         <p id="detailImgFail" class="hidden text-xs text-zinc-500">Gambar tidak dapat dimuat. <a class="text-sky-400 underline" target="_blank" rel="noopener noreferrer" href="${esc(shot)}">Buka link</a></p>
       </div>` : ''}`;
@@ -925,6 +1112,7 @@
       img.addEventListener('error', () => { img.classList.add('hidden'); $('#detailImgFail').classList.remove('hidden'); });
     }
     openModal('modalDetail');
+    $('#detailBody').scrollTop = 0;
   }
 
   function deleteTrade(id) {
@@ -996,6 +1184,7 @@
   /* ===================== EVENT BINDING ===================== */
   function bind() {
     $('#btnAdd').addEventListener('click', () => openForm());
+    $('#fab').addEventListener('click', () => openForm());
     $('#tradeForm').addEventListener('submit', submitForm);
 
     $('#btnMenu').addEventListener('click', e => { e.stopPropagation(); $('#menu').classList.toggle('hidden'); });
@@ -1008,9 +1197,9 @@
       else if (a === 'json') exportJSON();
       else if (a === 'import') $('#fileImport').click();
       else if (a === 'demo') confirmBox({
-        title: 'Reset / Isi Data Demo?', msg: 'Semua data saat ini akan diganti dengan 14 trade demo.',
+        title: 'Reset / Isi Data Demo?', msg: 'Semua data saat ini akan diganti dengan 15 trade demo.',
         okText: 'Ya, Isi Demo', okClass: 'btn-primary',
-        onOk: () => { trades = buildDemo(); saveAll(); renderAll(); toast('Data demo dimuat.', 'info'); }
+        onOk: () => { trades = buildDemo(); visible = PAGE; saveAll(); renderAll(); toast('Data demo dimuat.', 'info'); }
       });
       else if (a === 'clear') confirmBox({
         title: 'Hapus semua data?', msg: 'Seluruh riwayat trade akan dihapus permanen. Disarankan export backup JSON terlebih dahulu.',
@@ -1027,15 +1216,19 @@
     });
 
     // filter
-    const fmap = { fQ: 'q', fSymbol: 'symbol', fStatus: 'status', fDir: 'dir', fEmotion: 'emotion' };
-    Object.keys(fmap).forEach(id => $('#' + id).addEventListener(id === 'fQ' ? 'input' : 'change', e => { filters[fmap[id]] = e.target.value; renderTable(); }));
+    const fmap = { fQ: 'q', fSymbol: 'symbol', fStatus: 'status', fDir: 'dir', fEmotion: 'emotion', fSort: 'sort' };
+    Object.keys(fmap).forEach(id => $('#' + id).addEventListener(id === 'fQ' ? 'input' : 'change', e => {
+      filters[fmap[id]] = e.target.value; visible = PAGE; renderTable();
+    }));
     $('#btnResetFilter').addEventListener('click', () => {
-      filters = { q: '', symbol: '', status: '', dir: '', emotion: '' };
+      filters = { q: '', symbol: '', status: '', dir: '', emotion: '', sort: 'new' }; visible = PAGE;
       $('#fQ').value = ''; $('#fStatus').value = ''; $('#fDir').value = '';
       renderFilterOptions(); renderTable();
     });
+    $('#btnFilterToggle').addEventListener('click', () => $('#filterGrid').classList.toggle('open'));
+    $('#btnLoadMore').addEventListener('click', () => { visible += PAGE; renderTable(); });
 
-    // aksi tabel & detail (delegasi)
+    // aksi tabel, kartu & detail (delegasi)
     document.addEventListener('click', e => {
       const closeBtn = e.target.closest('[data-close]');
       if (closeBtn) { closeModal(closeBtn.dataset.close); return; }
@@ -1048,8 +1241,7 @@
     });
 
     // klik backdrop modal
-    ['modalForm', 'modalDetail'].forEach(id => $('#' + id).addEventListener('mousedown', e => { if (e.target.id === id) closeModal(id); }));
-    $('#modalConfirm').addEventListener('mousedown', e => { if (e.target.id === 'modalConfirm') closeModal('modalConfirm'); });
+    ['modalForm', 'modalDetail', 'modalConfirm'].forEach(id => $('#' + id).addEventListener('mousedown', e => { if (e.target.id === id) closeModal(id); }));
     $('#lightbox').addEventListener('click', () => $('#lightbox').classList.add('hidden'));
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
@@ -1058,10 +1250,11 @@
     });
 
     // form: kalkulasi otomatis
-    ['f-direction', 'f-entry', 'f-sl', 'f-tp', 'f-exit', 'f-size', 'f-mult'].forEach(id => $('#' + id).addEventListener('input', () => {
+    ['f-entry', 'f-sl', 'f-tp', 'f-exit', 'f-size', 'f-mult'].forEach(id => $('#' + id).addEventListener('input', () => {
       if (id === 'f-mult') multTouched = true;
       recalcForm();
     }));
+    $('#dirSeg').addEventListener('click', e => { const b = e.target.closest('[data-dir]'); if (b) { setDir(b.dataset.dir); recalcForm(); } });
     $('#f-symbol').addEventListener('input', e => {
       if (!multTouched) $('#f-mult').value = defaultMult(e.target.value);
       recalcForm();
@@ -1074,6 +1267,9 @@
       if (!u) { setErr('shot', 'Masukkan URL gambar valid (http/https).', 'f-shot'); return; }
       clearErrors(); openLightbox(u);
     });
+
+    // ganti layout chart saat lebar layar melewati breakpoint
+    if (mq.addEventListener) mq.addEventListener('change', renderAll); else mq.addListener(renderAll);
   }
 
   /* ===================== INIT ===================== */
@@ -1082,7 +1278,12 @@
   initCharts();
   bind();
   renderAll();
+
+  // pastikan ukuran chart benar setelah Tailwind / font selesai dimuat
+  const resizeAll = () => [eqChart, distChart, setupChart].forEach(c => c && c.resize());
+  window.addEventListener('load', resizeAll);
+  setTimeout(resizeAll, 400);
 })();
 </script>
 </body>
-                </html>
+              </html>
